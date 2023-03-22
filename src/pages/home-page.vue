@@ -1,5 +1,8 @@
 <template>
   <div class="container">
+      <div class="Error">
+        <Error :error="errorMessage" @retryFetch="retryFetch"/>
+      </div>
       <div class="content" v-if="cardsData.length">
         <Card v-for="card in cardsData" :key="card.id" :title="card.title" :body="card.body"/>
        
@@ -12,17 +15,20 @@
 </template>
 <script>
 import Card from '../components/card-temp.vue'
+import Error from '../components/error-temp.vue'
 export default {
   data() {
     return {
       cardsData:[],
       page:1,
       perPage:10,
-      retryReq:2
+      retryReq:2,
+      errorMessage:null
     };
   },
   components:{
-    Card
+    Card,
+    Error
   },
   created() {
   this.getPostsData()
@@ -46,12 +52,15 @@ export default {
       this.cardsData=res.data
     }).catch(err=>{
       if(this.retryReq>1){
-
-        console.log(err,"errorhhhghg");
+        this.errorMessage=`${err}`
         this.getPostsData()
         this.retryReq=this.retryReq-1
       }
     })
+    },
+    retryFetch(){
+      this.page=1
+      this.getPostsData()
     }
   }
 };
